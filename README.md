@@ -12,3 +12,6 @@
 **_Third variant:_**
 - new types data and write to DB -> flask
 - more: calculate x+=delta_x (radian) and y=1000*sin(x) -> mongoDB -> flask
+
+**_Fourth variant:_**
+- Combi version
