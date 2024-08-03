@@ -187,8 +187,128 @@ def chart():
     </html>
     """
 
-
     return render_template_string(html_template)
+
+
+
+@app.route('/combined')
+def combined():
+    html_template = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Combined View</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            body {
+                display: flex;
+                height: 100vh;
+                margin: 0;
+            }
+            #sidebar {
+                width: 30%;
+                background-color: #f4f4f4;
+                padding: 10px;
+                border-right: 1px solid #ccc;
+                overflow-y: auto;
+            }
+            #main-content {
+                width: 70%;
+                padding: 10px;
+                background-color: #fff;
+            }
+            #chart-container {
+                width: 100%;
+                height: 80vh;
+            }
+        </style>
+        <script>
+            let chart;
+
+            // Функция для получения данных с сервера и обновления графика и текстовых данных
+            async function fetchData() {
+                try {
+                    const response = await fetch('/');
+                    const data = await response.json();
+
+                    // Обновление текстовых данных
+                    const dataContainer = document.getElementById('data-container');
+                    dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
+                    const newData = document.createElement('div');
+                    newData.textContent = JSON.stringify(data, null, 4);
+                    dataContainer.appendChild(newData);
+                    dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+
+                    // Обновление графика
+                    const labels = data.map(item => item.x.toFixed(2));
+                    const values = data.map(item => item.y.toFixed(2));
+
+                    if (chart) {
+                        chart.data.labels = labels;
+                        chart.data.datasets[0].data = values;
+                        chart.update();
+                    } else {
+                        const ctx = document.getElementById('myChart').getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Y values',
+                                    data: values,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1,
+                                    fill: false
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'X (degrees)'
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Y'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            }
+
+            // Вызов функции для получения данных при загрузке страницы
+            fetchData();
+
+            // Установка интервала для автоматического обновления данных каждые 20 секунд
+            setInterval(fetchData, 20000); // 20000 миллисекунд = 20 секунд
+        </script>
+    </head>
+    <body>
+        <div id="sidebar">
+            <h1>Data from MongoDB</h1>
+            <div id="data-container"></div>
+        </div>
+        <div id="main-content">
+            <h1>Data Chart from MongoDB</h1>
+            <div id="chart-container">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return render_template_string(html_template)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
