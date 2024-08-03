@@ -28,6 +28,8 @@ SOURCE_GENERATOR="$PROJECT_DIR/source_generator"
 SOURCE_USER="$PROJECT_DIR/source_user"
 DATA_GENERATOR="$PROJECT_DIR/datagenerator"
 DATA_USER="$PROJECT_DIR/datauser"
+PORT_HOST=8989
+PORT_CONT=5000
 
 # Функция для проверки и создания папок
 create_folder() {
@@ -122,6 +124,7 @@ build_and_run() {
 
   docker run --name data_user \
              --network net_db_user \
+             -p $PORT_HOST:$PORT_CONT \
              -d data_user
 }
 
