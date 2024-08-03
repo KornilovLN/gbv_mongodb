@@ -9,3 +9,6 @@
 **_Second variant:_**
 - added to simple generation any data and write to DB -> flask
 
+**_Third variant:_**
+- new types data and write to DB -> flask
+- more: calculate x+=delta_x (radian) and y=1000*sin(x) -> mongoDB -> flask

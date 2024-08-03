@@ -13,6 +13,8 @@ def fetch_data():
             collection = db["mycollection"]
             while True:
                 for record in collection.find().sort("timestamp"):
+                    record["x"] = float(record["x"])
+                    record["y"] = float(record["y"])
                     print(json.dumps(record, indent=4, default=json_util.default))               
                 time.sleep(3)
         except pymongo.errors.ServerSelectionTimeoutError as err:
