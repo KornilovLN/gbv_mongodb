@@ -18,3 +18,6 @@
 
 **_Fifth variant:_**
 - Combi version with templates folder
+
+**_Sixth variant:_**
+- Version with templates folder and full-site architecture
