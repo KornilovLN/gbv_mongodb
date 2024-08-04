@@ -210,3 +210,73 @@ if __name__ == "__main__":
     time.sleep(10)  # Wait for MongoDB to be ready
     generate_data()
 
+
+
+
+
+// Функция для получения данных с сервера и обновления графика и текстовых данных
+async function fetchData() {
+    try {
+        const response = await fetch('/');
+        const data = await response.json();
+
+        // Обновление текстовых данных
+        const dataContainer = document.getElementById('data-container');
+        dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
+
+        // Фильтрация данных для включения только x, y и timestamp
+        const filteredData = data.map(item => ({
+            x: item.x,
+            y: item.y,
+            timestamp: item.timestamp
+        }));
+
+        const newData = document.createElement('div');
+        newData.textContent = JSON.stringify(filteredData, null, 4);
+        dataContainer.appendChild(newData);
+        dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+
+        // Обновление графика
+        const labels = filteredData.map(item => item.x.toFixed(2));
+        const values = filteredData.map(item => item.y.toFixed(2));
+
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.update();
+        } else {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Y values',
+                        data: values,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'X (degrees)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Y'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}

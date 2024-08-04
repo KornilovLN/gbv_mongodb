@@ -12,83 +12,101 @@
             margin: 0;
         }
         #sidebar {
-            width: 30%;
-            background-color: #f4f4f4;
+            width: 20%;
+            background-color: #e7e7e0;
             padding: 10px;
-            border-right: 1px solid #ccc;
+            border-right: 1px solid #c9b7b7;
             overflow-y: auto;
         }
         #main-content {
-            width: 70%;
+            width: 80%;
             padding: 10px;
-            background-color: #fff;
+            background-color: #ece7ec;
         }
         #chart-container {
             width: 100%;
-            height: 80vh;
+            height: 100vh;
+        }
+        #h2 {
+            color: #66788d;
+        }
+        #data-container {
+            margin-top: 20px;
         }
     </style>
     <script>
         let chart;
 
-        // Функция для получения данных с сервера и обновления графика и текстовых данных
-        async function fetchData() {
-            try {
-                const response = await fetch('/');
-                const data = await response.json();
+// Функция для получения данных с сервера и обновления графика и текстовых данных
+async function fetchData() {
+    try {
+        const response = await fetch('/');
+        const data = await response.json();
 
-                // Обновление текстовых данных
-                const dataContainer = document.getElementById('data-container');
-                dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
-                const newData = document.createElement('div');
-                newData.textContent = JSON.stringify(data, null, 4);
-                dataContainer.appendChild(newData);
-                dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+        // Обновление текстовых данных
+        const dataContainer = document.getElementById('data-container');
+        dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
 
-                // Обновление графика
-                const labels = data.map(item => item.x.toFixed(2));
-                const values = data.map(item => item.y.toFixed(2));
+        // Фильтрация данных для включения только x, y и timestamp
+        const filteredData = data.map(item => ({
+            x: item.x.toFixed(2),
+            y: item.y.toFixed(2),
+            timestamp: item.timestamp
+        }));
 
-                if (chart) {
-                    chart.data.labels = labels;
-                    chart.data.datasets[0].data = values;
-                    chart.update();
-                } else {
-                    const ctx = document.getElementById('myChart').getContext('2d');
-                    chart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Y values',
-                                data: values,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                borderWidth: 1,
-                                fill: false
-                            }]
+        // Создание строки для каждого элемента данных и добавление новой строки между пачками
+        const newData = document.createElement('div');
+        newData.innerHTML = filteredData.map(item => `${item.timestamp}    x: ${item.x}, y: ${item.y}`).join('<br>');
+        dataContainer.appendChild(newData);
+        dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+
+        // Обновление графика
+        const labels = filteredData.map(item => item.x);
+        const values = filteredData.map(item => item.y);
+
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.update();
+        } else {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Y values',
+                        data: values,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'X (degrees)'
+                            }
                         },
-                        options: {
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'X (degrees)'
-                                    }
-                                },
-                                y: {
-                                    title: {
-                                        display: true,
-                                        text: 'Y'
-                                    }
-                                }
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Y'
                             }
                         }
-                    });
+                    }
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
+            });
         }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
+
 
         // Вызов функции для получения данных при загрузке страницы
         fetchData();
@@ -99,11 +117,11 @@
 </head>
 <body>
     <div id="sidebar">
-        <h1>Data from MongoDB</h1>
+        <h2>Data from MongoDB</h2>
         <div id="data-container"></div>
     </div>
     <div id="main-content">
-        <h1>Data Chart from MongoDB</h1>
+        <h2>Data Chart from MongoDB</h2>
         <div id="chart-container">
             <canvas id="myChart"></canvas>
         </div>

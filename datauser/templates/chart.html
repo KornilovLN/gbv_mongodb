@@ -6,10 +6,18 @@
     <title>Data Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        body {
+            background-color: #b8b6b9;
+            margin: 0;
+        }
         #chart-container {
-            width: 80%;
-            height: 80vh;
+            width: 100%;
+            height: 90vh;
+            background-color: #d2ebe3;
             margin: auto;
+        }
+        #h2 {
+            color: #7d94ad;
         }
     </style>
     <script>
@@ -72,7 +80,7 @@
     </script>
 </head>
 <body>
-    <h1>Data Chart from MongoDB</h1>
+    <h2>Data Chart from MongoDB</h2>
     <div id="chart-container">
         <canvas id="myChart"></canvas>
     </div>
