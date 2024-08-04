@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #chart-container {
+            width: 80%;
+            height: 80vh;
+            margin: auto;
+        }
+    </style>
+    <script>
+        let chart;
+
+        // Функция для получения данных с сервера и обновления графика
+        async function fetchData() {
+            try {
+                const response = await fetch('/');
+                const data = await response.json();
+                const labels = data.map(item => item.x.toFixed(2));
+                const values = data.map(item => item.y.toFixed(2));
+
+                if (chart) {
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = values;
+                    chart.update();
+                } else {
+                    const ctx = document.getElementById('myChart').getContext('2d');
+                    chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Y values',
+                                data: values,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'X (degrees)'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Y'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Вызов функции для получения данных при загрузке страницы
+        fetchData();
+
+        // Установка интервала для автоматического обновления данных каждые 20 секунд
+        setInterval(fetchData, 20000); // 20000 миллисекунд = 20 секунд
+    </script>
+</head>
+<body>
+    <h1>Data Chart from MongoDB</h1>
+    <div id="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+</body>
+</html>

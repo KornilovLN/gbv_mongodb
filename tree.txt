@@ -1,15 +1,29 @@
 .
+├── add_commit_push.sh
+├── clear_database.py
 ├── creater.sh
 ├── datagenerator
+│   ├── data_generator.py
 │   └── Dockerfile
 ├── datauser
-│   └── Dockerfile
+│   ├── app.py
+│   ├── data_user.py
+│   ├── Dockerfile
+│   └── templates
+│       ├── chart.html
+│       ├── combined.html
+│       └── view.html
+├── Dockerfile
+├── info
+│   └── saved
+├── README.md
 ├── source_generator
 │   ├── data_generator.py
 │   └── Dockerfile
 ├── source_user
+│   ├── app.py
 │   ├── data_user.py
 │   └── Dockerfile
 └── tree.txt
 
-4 directories, 8 files
+6 directories, 20 files

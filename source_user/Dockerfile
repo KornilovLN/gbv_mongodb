@@ -8,6 +8,7 @@ WORKDIR /
 
 COPY data_user.py .
 COPY app.py .
+COPY templates ./templates/
 
 CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]
 
