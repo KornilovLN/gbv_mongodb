@@ -15,3 +15,6 @@
 
 **_Fourth variant:_**
 - Combi version
+
+**_Fifth variant:_**
+- Combi version with templates folder
