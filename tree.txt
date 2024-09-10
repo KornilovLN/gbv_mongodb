@@ -1,6 +1,7 @@
 .
 ├── add_commit_push.sh
 ├── clear_database.py
+├── container_del.py
 ├── creater.sh
 ├── datagenerator
 │   ├── data_generator.py
@@ -14,8 +15,11 @@
 │       ├── combined.html
 │       └── view.html
 ├── Dockerfile
+├── graph.py
+├── images_del.py
 ├── info
 │   └── saved
+├── pymongo
 ├── README.md
 ├── source_generator
 │   ├── data_generator.py
@@ -26,4 +30,4 @@
 │   └── Dockerfile
 └── tree.txt
 
-6 directories, 20 files
+6 directories, 24 files

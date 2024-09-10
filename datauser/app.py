@@ -2,6 +2,8 @@ from flask import Flask, jsonify, render_template
 import pymongo
 from bson import json_util, ObjectId
 from datetime import datetime
+from flask import make_response
+
 
 app = Flask(__name__)
 
@@ -36,7 +38,8 @@ def get_data():
     except Exception as e:
         app.logger.error(f"Error fetching data: {e}")
         raise e  # Raise the exception to be caught in the route handler
-
+    
+'''
 @app.route('/')
 def index():
     try:
@@ -49,6 +52,26 @@ def index():
     except Exception as e:
         app.logger.error(f"Error in index route: {e}")
         return jsonify({"error": str(e)}), 500
+'''
+
+@app.route('/')
+def index():
+    try:
+        app.logger.info("Handling request to '/' route...")
+        data = get_data()
+        app.logger.info("Converting BSON to JSON...")
+        json_data = convert_bson_to_json(data)
+        app.logger.info("Data converted successfully.")
+        
+        response = make_response(jsonify(json_data))
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+    except Exception as e:
+        app.logger.error(f"Error in index route: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/view')
 def view():

@@ -36,83 +36,80 @@
     </style>
     <script>
         let chart;
+        //const MAX_RECORDS = 1024;
+        let dataArray = [];
 
-// Функция для получения данных с сервера и обновления графика и текстовых данных
-async function fetchData() {
-    try {
-        const response = await fetch('/');
-        const data = await response.json();
+        async function fetchData() {
+            try {
+                const response = await fetch('/');
+                const data = await response.json();
 
-        // Обновление текстовых данных
-        const dataContainer = document.getElementById('data-container');
-        dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
+                // Update dataArray
+                //dataArray = [...dataArray, ...data].slice(-MAX_RECORDS);
+                dataArray = data;
 
-        // Фильтрация данных для включения только x, y и timestamp
-        const filteredData = data.map(item => ({
-            x: item.x.toFixed(2),
-            y: item.y.toFixed(2),
-            timestamp: item.timestamp
-        }));
+                // Обновление текстовых данных
+                const dataContainer = document.getElementById('data-container');
+                dataContainer.innerHTML = '';
 
-        // Создание строки для каждого элемента данных и добавление новой строки между пачками
-        const newData = document.createElement('div');
-        newData.innerHTML = filteredData.map(item => `${item.timestamp}    x: ${item.x}, y: ${item.y}`).join('<br>');
-        dataContainer.appendChild(newData);
-        dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+                // Создание строки для каждого элемента данных
+                const newData = document.createElement('div');
+                newData.innerHTML = dataArray.map(item => 
+                    `${item.timestamp} x: ${item.x.toFixed(2)}, y: ${item.y.toFixed(2)}`
+                ).join('<br>');
+                dataContainer.appendChild(newData);
+                dataContainer.scrollTop = dataContainer.scrollHeight;
 
-        // Обновление графика
-        const labels = filteredData.map(item => item.x);
-        const values = filteredData.map(item => item.y);
+                // Обновление графика
+                const labels = dataArray.map(item => item.x.toFixed(2));
+                const values = dataArray.map(item => item.y.toFixed(2));
 
-        if (chart) {
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = values;
-            chart.update();
-        } else {
-            const ctx = document.getElementById('myChart').getContext('2d');
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Y values',
-                        data: values,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                        fill: false
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'X (degrees)'
-                            }
+                if (chart) {
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = values;
+                    chart.update();
+                } else {
+                    const ctx = document.getElementById('myChart').getContext('2d');
+                    chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Y values',
+                                data: values,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            }]
                         },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Y'
+                        options: {
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'X (degrees)'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Y'
+                                    }
+                                }
                             }
                         }
-                    }
+                    });
                 }
-            });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-}
-
-
-
 
         // Вызов функции для получения данных при загрузке страницы
         fetchData();
 
-        // Установка интервала для автоматического обновления данных каждые 20 секунд
-        setInterval(fetchData, 20000); // 20000 миллисекунд = 20 секунд
+        // Установка интервала для автоматического обновления данных кажд 5 сек
+        setInterval(fetchData, 5000);
     </script>
 </head>
 <body>

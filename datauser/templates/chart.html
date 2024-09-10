@@ -16,21 +16,55 @@
             background-color: #d2ebe3;
             margin: auto;
         }
-        #h2 {
+        h2 {
             color: #7d94ad;
         }
     </style>
     <script>
         let chart;
 
+        const POINTSMAX = 144;
+
+        // Массивы для хранения данных
+        let labels = [];
+        let values = [];
+
+        // Флаг для управления состоянием загрузки данных
+        let isFetching = false;
+
         // Функция для получения данных с сервера и обновления графика
         async function fetchData() {
+            if (isFetching) return; // Избегаем одновременного выполнения нескольких запросов
+            isFetching = true;
+
+            console.log('Fetching data...'); // Отладочный вывод
+
             try {
                 const response = await fetch('/');
                 const data = await response.json();
-                const labels = data.map(item => item.x.toFixed(2));
-                const values = data.map(item => item.y.toFixed(2));
 
+                console.log('Data received:', data); // Отладочный вывод
+
+
+                // Добавление новых данных
+                //labels.push(...data.map(item => item.x.toFixed(2)));
+                //values.push(...data.map(item => item.y.toFixed(2)));
+
+                // Обновление новых данных
+                labels = data.map(item => item.x.toFixed(2));
+                values = data.map(item => item.y.toFixed(2));
+
+
+                // Обрезка массивов до размера POINTSMAX
+                if (labels.length > POINTSMAX) {
+                    labels = labels.slice(-POINTSMAX);
+                    values = values.slice(-POINTSMAX);
+                }
+
+                // Печать длины labels
+                console.log(labels.length);
+
+                // Обновление или создание графика
                 if (chart) {
                     chart.data.labels = labels;
                     chart.data.datasets[0].data = values;
@@ -52,9 +86,12 @@
                         options: {
                             scales: {
                                 x: {
+                                    type: 'linear',
+                                    min: 0,
+                                    max: 2 * Math.PI,
                                     title: {
                                         display: true,
-                                        text: 'X (degrees)'
+                                        text: 'X (radians)'
                                     }
                                 },
                                 y: {
@@ -69,14 +106,16 @@
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
+            } finally {
+                isFetching = false;
             }
         }
 
         // Вызов функции для получения данных при загрузке страницы
         fetchData();
 
-        // Установка интервала для автоматического обновления данных каждые 20 секунд
-        setInterval(fetchData, 20000); // 20000 миллисекунд = 20 секунд
+        // Установка интервала для автоматического обновления данных каждые 1 секунду
+        setInterval(fetchData, 5000); // 1000 миллисекунд = 1 секунд
     </script>
 </head>
 <body>

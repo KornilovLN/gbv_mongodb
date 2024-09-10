@@ -14,29 +14,52 @@
             border: 1px solid #ccc;
         }
     </style>
+
     <script>
+        // Максимальное количество точек, которые будут отображаться
+        const POINTSMAX = 144;
+    
+        // Массив для хранения полученных данных
+        let dataPoints = [];
+    
         // Функция для получения данных с сервера и обновления их на странице
         async function fetchData() {
             try {
                 const response = await fetch('/');
                 const data = await response.json();
+    
+                // Добавление новых данных в массив dataPoints
+                dataPoints.push(...data);
+    
+                // Если количество точек превышает POINTSMAX, удалить старые точки
+                if (dataPoints.length > POINTSMAX) {
+                    dataPoints = dataPoints.slice(dataPoints.length - POINTSMAX);
+                }
+    
+                // Очистка контейнера перед добавлением новых данных
                 const dataContainer = document.getElementById('data-container');
-                dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
+                dataContainer.innerHTML = '';
+    
+                // Отображение данных в контейнере
                 const newData = document.createElement('div');
-                newData.textContent = JSON.stringify(data, null, 4);
-                dataContainer.appendChild(newData); // Добавление новых данных в конец
-                dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+                //newData.textContent = JSON.stringify(dataPoints, null, 4);
+                newData.textContent = JSON.stringify(dataPoints, null, 4);
+                dataContainer.appendChild(newData);
+    
+                // Прокрутка вниз после обновления данных
+                dataContainer.scrollTop = dataContainer.scrollHeight;
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         }
-
+    
         // Вызов функции для получения данных при загрузке страницы
         fetchData();
-
+    
         // Установка интервала для автоматического обновления данных каждые 20 секунд
-        setInterval(fetchData, 20000); // 20000 миллисекунд = 20 секунд
+        setInterval(fetchData, 5000); // 1000 миллисекунд = 1 секунд
     </script>
+    
 </head>
 <body>
     <h1>Data from MongoDB</h1>

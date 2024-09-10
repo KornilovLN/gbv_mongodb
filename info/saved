@@ -34,6 +34,91 @@ def index():
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
 
+ #----------------------------------------------------------------
+ # datagenerator/data_generator.py
+
+import pymongo
+from bson.objectid import ObjectId
+import time
+from datetime import datetime
+import math
+import random
+
+PAUSE_TIME=1
+
+def generate_data():
+    client = pymongo.MongoClient("mongodb://mongo_gen:27017/")
+    db = client["mydatabase"]
+    collection = db["mycollection"]
+
+    x_value = 0.0
+    delta_x = 1 * math.pi / 180  # Шаг приращения
+
+    while True:
+        
+        # Генерация случайных данных        
+        y_rnd = random.uniform(-200.0, 200.0) 
+        k_rnd = random.uniform(1.0, 5.0)
+        
+        # Вычисление значений x и y
+        x_value += delta_x
+        y_value = 1000 * math.sin(x_value) + y_rnd * k_rnd
+
+        # Получение статистики базы данных
+        stats = db.command("dbstats")
+
+        data = {
+            "x": x_value,
+            "y": y_value,
+            "timestamp": ObjectId().generation_time,
+            "db_stats": {
+                "storageSize": stats["storageSize"],
+                "timestamp": datetime.now()
+            }
+        }
+        collection.insert_one(data)
+        print(f"Inserted data: {data}")
+
+
+        time.sleep(PAUSE_TIME)
+
+if __name__ == "__main__":
+    time.sleep(10)  # Wait for MongoDB to be ready
+    generate_data()
+
+#-------------------------------------------------------------  
+
+# datauser/data_user.py
+
+import pymongo
+import time
+import json
+from bson import json_util
+
+MAX_RECORDS = 1024
+PAUSE_TIME=1
+
+def fetch_data():
+    while True:
+        try:
+            client = pymongo.MongoClient("mongodb://my_mongo:27017/")
+            db = client["mydatabase"]
+            collection = db["mycollection"]
+            while True:
+                for record in collection.find().sort("timestamp"):
+                    record["x"] = float(record["x"])
+                    record["y"] = float(record["y"])
+                    #print(json.dumps(record, indent=4, default=json_util.default))  
+                    print(json.dumps(record, indent=1, default=json_util.default))               
+                time.sleep(PAUSE_TIME)
+        except pymongo.errors.ServerSelectionTimeoutError as err:
+            print("Could not connect to MongoDB: ", err)
+            time.sleep(PAUSE_TIME)
+
+if __name__ == "__main__":
+    time.sleep(10)  # Wait for MongoDB to be ready
+    fetch_data()
+
 
 
 
@@ -280,3 +365,161 @@ async function fetchData() {
         console.error('Error fetching data:', error);
     }
 }
+
+
+    <script>
+        // Функция для получения данных с сервера и обновления их на странице
+        async function fetchData() {
+            try {
+                const response = await fetch('/');
+                const data = await response.json();
+                const dataContainer = document.getElementById('data-container');
+                dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
+                const newData = document.createElement('div');
+                newData.textContent = JSON.stringify(data, null, 4);
+                dataContainer.appendChild(newData); // Добавление новых данных в конец
+                dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Вызов функции для получения данных при загрузке страницы
+        fetchData();
+
+        // Установка интервала для автоматического обновления данных каждые 20 секунд
+        setInterval(fetchData, 20000); // 20000 миллисекунд = 20 секунд
+    </script>
+
+#----------------------------------------------------------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined View</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        #sidebar {
+            width: 20%;
+            background-color: #e7e7e0;
+            padding: 10px;
+            border-right: 1px solid #c9b7b7;
+            overflow-y: auto;
+        }
+        #main-content {
+            width: 80%;
+            padding: 10px;
+            background-color: #ece7ec;
+        }
+        #chart-container {
+            width: 100%;
+            height: 100vh;
+        }
+        #h2 {
+            color: #66788d;
+        }
+        #data-container {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        let chart;
+
+// Функция для получения данных с сервера и обновления графика и текстовых данных
+async function fetchData() {
+    try {
+        const response = await fetch('/');
+        const data = await response.json();
+
+        // Обновление текстовых данных
+        const dataContainer = document.getElementById('data-container');
+        dataContainer.innerHTML = ''; // Очистка контейнера перед добавлением новых данных
+
+        // Фильтрация данных для включения только x, y и timestamp
+        const filteredData = data.map(item => ({
+            x: item.x.toFixed(2),
+            y: item.y.toFixed(2),
+            timestamp: item.timestamp
+        }));
+
+        // Создание строки для каждого элемента данных и добавление новой строки между пачками
+        const newData = document.createElement('div');
+        newData.innerHTML = filteredData.map(item => `${item.timestamp}    x: ${item.x}, y: ${item.y}`).join('<br>');
+        dataContainer.appendChild(newData);
+        dataContainer.scrollTop = dataContainer.scrollHeight; // Прокрутка вниз после обновления данных
+
+        // Обновление графика
+        const labels = filteredData.map(item => item.x);
+        const values = filteredData.map(item => item.y);
+
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.update();
+        } else {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Y values',
+                        data: values,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'X (degrees)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Y'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
+
+
+        // Вызов функции для получения данных при загрузке страницы
+        fetchData();
+
+        // Установка интервала для автоматического обновления данных каждые 20 секунд
+        setInterval(fetchData, 1000); // 1000 миллисекунд = 1 секунд
+    </script>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>Data from MongoDB</h2>
+        <div id="data-container"></div>
+    </div>
+    <div id="main-content">
+        <h2>Data Chart from MongoDB</h2>
+        <div id="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+</body>
+</html>

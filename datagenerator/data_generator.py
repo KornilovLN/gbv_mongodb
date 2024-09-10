@@ -7,24 +7,29 @@ from datetime import datetime
 import math
 import random
 
+MAX_RECORDS = 512   # Максимальное количество записей в коллекции
+
+PAUSE_TIME = 5
+
 def generate_data():
     client = pymongo.MongoClient("mongodb://mongo_gen:27017/")
     db = client["mydatabase"]
     collection = db["mycollection"]
 
     x_value = 0.0
-    delta_x = 5 * math.pi / 180  # Шаг приращения в радианах
+    delta_x = 5 * math.pi / 180  # Шаг приращения
+
+    record_count = 0
 
     while True:
-        '''
-        # Генерация случайных данных        
-        x_value = random.randint(1, 100)
-        y_value = x_value * 2  # Example computation
-        '''
         
-        # Вычисление значений x и y
+        # Генерация случайных данных        
+        y_rnd = random.uniform(-50.0, 50.0) 
+        k_rnd = random.uniform(1.0, 5.0)
+        
+        # Вычисление значений x и y с примесью шума
         x_value += delta_x
-        y_value = 1000 * math.sin(x_value)
+        y_value = 1000 * math.sin(x_value) + y_rnd * k_rnd
 
         # Получение статистики базы данных
         stats = db.command("dbstats")
@@ -39,10 +44,26 @@ def generate_data():
             }
         }
         collection.insert_one(data)
+
+        
+        record_count += 1
+        if record_count >= MAX_RECORDS: # Clear the entire collection
+            collection.delete_many({})
+            record_count = 0
+            print("Table cleared after reaching {MAX_RECORDS} records")
+        
+    
+        '''
+        if record_count > MAX_RECORDS:
+            oldest_record = collection.find_one(sort=[("timestamp", 1)])
+            if oldest_record:
+                collection.delete_one({"_id": oldest_record["_id"]})
+        '''
+
         print(f"Inserted data: {data}")
 
 
-        time.sleep(5)
+        time.sleep(PAUSE_TIME)
 
 if __name__ == "__main__":
     time.sleep(10)  # Wait for MongoDB to be ready
