@@ -1,0 +1,18 @@
+.
+├── container_del.py
+├── creater.sh
+├── datagenerator
+│   ├── data_generator.py
+│   └── Dockerfile
+├── datauser
+│   ├── app.py
+│   ├── data_user.py
+│   ├── Dockerfile
+│   └── templates
+│       ├── chart.html
+│       ├── combined.html
+│       └── view.html
+├── images_del.py
+└── tree.txt
+
+3 directories, 12 files
