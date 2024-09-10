@@ -2,17 +2,23 @@
 ├── container_del.py
 ├── creater.sh
 ├── datagenerator
+│   ├── create_dock_gen.sh
 │   ├── data_generator.py
-│   └── Dockerfile
+│   ├── Dockerfile
+│   └── instr_gen
 ├── datauser
 │   ├── app.py
+│   ├── create_dock_usr.sh
 │   ├── data_user.py
 │   ├── Dockerfile
+│   ├── instr_usr
 │   └── templates
 │       ├── chart.html
 │       ├── combined.html
 │       └── view.html
 ├── images_del.py
+├── mongodb
+│   └── create_dock_mng.sh
 └── tree.txt
 
-3 directories, 12 files
+4 directories, 17 files

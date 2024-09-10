@@ -1,17 +1,20 @@
 # datauser/data_user.py
 
+import os
 import pymongo
 import time
 import json
 from bson import json_util
 
-#MAX_RECORDS = 512
-PAUSE_TIME = 5
+#MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://my_mongo:27017/')
+MONGO_URI = os.environ.get('MONGO_URI')
+PAUSE_TIME = int(os.environ.get('PAUSE_TIME', 5))
 
 def fetch_data():
     while True:
         try:
-            client = pymongo.MongoClient("mongodb://my_mongo:27017/")
+            #client = pymongo.MongoClient("mongodb://my_mongo:27017/")
+            client = pymongo.MongoClient(MONGO_URI)
             db = client["mydatabase"]
             collection = db["mycollection"]
 

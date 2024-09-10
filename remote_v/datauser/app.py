@@ -1,9 +1,11 @@
+import os
 from flask import Flask, jsonify, render_template
 import pymongo
 from bson import json_util, ObjectId
 from datetime import datetime
 from flask import make_response
 
+MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://my_mongo:27017/')
 
 app = Flask(__name__)
 
@@ -28,13 +30,17 @@ def convert_bson_to_json(data):
 def get_data():
     try:
         app.logger.info("Connecting to MongoDB...")
-        client = pymongo.MongoClient("mongodb://my_mongo:27017/")
+        client = pymongo.MongoClient(MONGO_URI)
+        #client = pymongo.MongoClient("mongodb://my_mongo:27017/")
         db = client["mydatabase"]
         collection = db["mycollection"]
+
         app.logger.info("Fetching data from MongoDB...")
         data = list(collection.find().sort("timestamp"))
         app.logger.info(f"Fetched {len(data)} records from MongoDB.")
+
         return data
+
     except Exception as e:
         app.logger.error(f"Error fetching data: {e}")
         raise e  # Raise the exception to be caught in the route handler

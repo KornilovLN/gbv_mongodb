@@ -14,7 +14,10 @@
 - more: calculate x+=delta_x (radian) and y=1000*sin(x) -> mongoDB -> flask
 
 **_Fourth variant:_**
-- Combi version
+- Combi version (branch: combi_version)
 
 **_Fifth variant:_**
-- Combi version with templates folder
+- Combi version with templates folder  (branch: combi_templates)
+
+**_Sixth variant:_**
+- Remote version (folder: remote_v) (branch: remote_version)

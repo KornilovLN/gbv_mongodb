@@ -147,7 +147,7 @@ case $ACTION in
     exit 1
     ;;
 esac
-
+ы
 # Открытие терминалов для логов (настраивается под вашу ОС)
 #gnome-terminal -- docker logs -f data_generator
 #gnome-terminal -- docker logs -f data_user

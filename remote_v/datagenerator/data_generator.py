@@ -6,13 +6,17 @@ import time
 from datetime import datetime
 import math
 import random
+import os
 
-MAX_RECORDS = 512   # Максимальное количество записей в коллекции
 
-PAUSE_TIME = 5
+#MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://mongo_gen:27017/')
+MONGO_URI = os.environ.get('MONGO_URI')
+MAX_RECORDS = int(os.environ.get('MAX_RECORDS', 512))
+PAUSE_TIME = int(os.environ.get('PAUSE_TIME', 5))
 
 def generate_data():
-    client = pymongo.MongoClient("mongodb://mongo_gen:27017/")
+    #client = pymongo.MongoClient("mongodb://mongo_gen:27017/")
+    client = pymongo.MongoClient(MONGO_URI)
     db = client["mydatabase"]
     collection = db["mycollection"]
 
@@ -24,7 +28,7 @@ def generate_data():
     while True:
         
         # Генерация случайных данных        
-        y_rnd = random.uniform(-50.0, 50.0) 
+        y_rnd = random.uniform(-25.0, 25.0) 
         k_rnd = random.uniform(1.0, 5.0)
         
         # Вычисление значений x и y с примесью шума
